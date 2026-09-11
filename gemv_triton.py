@@ -146,11 +146,10 @@ for size in [2048, 4096, 8192, 16384]:
     print(f"{'N':>5} {'MB moved':>8} {'ms':>9} {'GB/s':>8} {'all_close':>9}")
 
     y_ref = W @ x
-    print(y_ref)
     ms_native = triton.testing.do_bench(lambda: W @ x)
 
     bytes_needed: int = (
-        W.numel() * W.element_size() + x.numel() * x.element_size() * 2
+        W.numel() * W.element_size() + x.numel() * x.element_size() + y_ref.numel() * y_ref.element_size()
     )
 
     print(f"{size:>5} {bytes_needed / 1e6:>8.2f} {ms_native:>9.6f} {(bytes_needed / (ms_native / 1000)) / 1e9:>8.2f} {'GT'}")
@@ -170,7 +169,7 @@ for size in [2048, 4096, 8192, 16384]:
         print(f"{BLOCK_SIZE:>10} {ms_triton:>9.6f} {gbps:>8.2f} {torch.allclose(y_ref, y_gemv, atol=1e-2, rtol=1e-2):>9}")
     print()
 
-    print('——— Triron2d NAIVE ———')
+    print('——— Triton strip (rows one after another) ———')
     print(f"{'BLOCK_N':>7} {'BLOCK_K':>7} {'ms':>9} {'GB/s':>8} {'all_close':>9}")
 
     for rows_at_same_kernel in [2, 4, 8]:
@@ -186,7 +185,7 @@ for size in [2048, 4096, 8192, 16384]:
             print(f"{rows_at_same_kernel:>6} {BLOCK_SIZE:>6} {ms_triton:>9.6f} {gbps:>8.2f} {torch.allclose(y_gemv_tiled, y_ref, atol=1e-2, rtol=1e-2):>9}")
     print()
 
-    print('——— Triron2d TRUE ———')
+    print('——— Triton 2D tile ———')
     print(f"{'BLOCK_N':>7} {'BLOCK_K':>7} {'ms':>9} {'GB/s':>8} {'all_close':>9}")
     for rows_at_same_kernel in [2, 4, 8]:
         for BLOCK_SIZE in [256, 512, 1024, 2048]:
@@ -198,5 +197,5 @@ for size in [2048, 4096, 8192, 16384]:
             ))
             gbps = bytes_needed / (ms_triton / 1000) / 1e9
 
-            print(f"{rows_at_same_kernel:>6} {BLOCK_SIZE:>6} {ms_triton:>9.6f} {gbps:>8.2f} {torch.allclose(y_gemv_tiled2d, y_ref, atol=1e-1, rtol=1e-1):>9}")
+            print(f"{rows_at_same_kernel:>6} {BLOCK_SIZE:>6} {ms_triton:>9.6f} {gbps:>8.2f} {torch.allclose(y_gemv_tiled2d, y_ref, atol=1e-2, rtol=1e-2):>9}")
     print()

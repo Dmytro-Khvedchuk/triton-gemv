@@ -28,9 +28,9 @@ def parse(path):
             section = "cublas"; continue
         if line.startswith("——— Triton1d"):
             section = "flat"; continue
-        if "NAIVE" in line:
+        if "NAIVE" in line or "strip" in line:
             section = "strip"; continue
-        if "TRUE" in line:
+        if "TRUE" in line or "2D tile" in line:
             section = "tile2d"; continue
         nums = line.split()
         if section == "cublas" and len(nums) >= 5 and nums[-1] == "GT":
