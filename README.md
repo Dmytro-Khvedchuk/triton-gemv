@@ -37,7 +37,7 @@ Why this matters: a decode step is one GEMV per layer, at the small end of this 
 that fixed cost a few hundred times per token. That's the reason CUDA graphs, kernel fusion and
 persistent kernels exist.
 
-Write-up: <notion link>
+Write-up: [My First Triton Kernel: GEMV against the roofline](https://dmytro-khvedchuk.notion.site/my-first-triton-kernel-gemv-against-the-roofline)
 
 ## Files
 
